@@ -20,7 +20,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Docker Tag
-        run: echo "DOCKER_TAG=${{ github.event_name == 'push' && github.event.ref != 'refs/heads/master' && github.event.ref != 'refs/tags/'* && github.event.ref != 'refs/heads/'* && github.event.ref || env.DEFAULT_TAG }}" >> $GITHUB_ENV
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.event.ref != 'refs/tags/'* }}" == "true" ] && [ "${{ github.event.ref != 'refs/heads/master' }}" == "true" ] && [ "${{ github.event.ref != 'refs/heads/'* }}" == "true" ]; then
+            echo "DOCKER_TAG=${{ github.event.ref }}";
+          else
+            echo "DOCKER_TAG=${{ env.DEFAULT_TAG }}";
+          fi >> $GITHUB_ENV
 
       - name: Build Builder Image
         run: docker build -t builder:${DOCKER_TAG} -f Dockerfile .
