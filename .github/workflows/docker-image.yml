@@ -1,0 +1,32 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+
+env:
+  DEFAULT_TAG: "latest"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      DEFAULT_TAG: "latest"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set Docker Tag
+        run: echo "DOCKER_TAG=${{ github.event_name == 'push' && github.event.ref != 'refs/heads/master' && github.event.ref != 'refs/tags/'* && github.event.ref != 'refs/heads/'* && github.event.ref || env.DEFAULT_TAG }}" >> $GITHUB_ENV
+
+      - name: Build Builder Image
+        run: docker build -t builder:${DOCKER_TAG} -f Dockerfile .
+
+      - name: Build Release Image
+        run: docker build -t release:${DOCKER_TAG} -f Dockerfile --target=release .
+
+      - name: Display Docker Images
+        run: docker images
