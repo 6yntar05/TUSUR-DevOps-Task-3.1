@@ -18,14 +18,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
       - name: Set Docker Tag
         run: |
-          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.event.ref != 'refs/tags/'* }}" == "true" ] && [ "${{ github.event.ref != 'refs/heads/master' }}" == "true" ] && [ "${{ github.event.ref != 'refs/heads/'* }}" == "true" ]; then
-            echo "DOCKER_TAG=${{ github.event.ref }}";
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "DOCKER_TAG=${{ ${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}} }}";
           else
             echo "DOCKER_TAG=${{ env.DEFAULT_TAG }}";
           fi >> $GITHUB_ENV
+
 
       - name: Build Builder Image
         run: docker build -t builder:${DOCKER_TAG} -f Dockerfile .
