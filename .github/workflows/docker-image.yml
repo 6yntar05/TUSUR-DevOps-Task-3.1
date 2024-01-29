@@ -21,11 +21,12 @@ jobs:
         
       - name: Set Docker Tag
         run: |
-          if [ "${github.event_name}" == "push" ]; then
-            echo "DOCKER_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV;
+          if [ "${{ github.event_name }}" == "push" ]; then
+            DOCKER_TAG=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}};
           else
-            echo "DOCKER_TAG=${DEFAULT_TAG}" >> $GITHUB_ENV;
+            DOCKER_TAG=${DEFAULT_TAG};
           fi
+          echo "DOCKER_TAG=$DOCKER_TAG" >> $GITHUB_ENV
 
       - name: Build Builder Image
         run: docker build -t builder:${DOCKER_TAG} -f Dockerfile .
